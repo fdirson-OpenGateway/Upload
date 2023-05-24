@@ -133,17 +133,29 @@ class File extends \SplFileInfo
      * @throws \Upload\Exception\UploadException If file uploads are disabled in the php.ini file
      * @throws \InvalidArgumentException         If $_FILES key does not exist
      */
-    public function __construct($key, \Upload\Storage\Base $storage)
+    public function __construct($key, \Upload\Storage\Base $storage, ?int $index = null)
     {
-        if (!isset($_FILES[$key])) {
+        // Check if file uploads are allowed
+        if (ini_get('file_uploads') == false) {
+            throw new \RuntimeException('File uploads are disabled in your PHP.ini file');
+        }
+        
+        // Check if key exists
+        if (! isset($_FILES[$key])) {
             throw new \InvalidArgumentException("Cannot find uploaded file identified by key: $key");
         }
         $this->storage = $storage;
         $this->validations = array();
         $this->errors = array();
-        $this->originalName = $_FILES[$key]['name'];
-        $this->errorCode = $_FILES[$key]['error'];
-        parent::__construct($_FILES[$key]['tmp_name']);
+        if (is_null($index)) {
+            $this->originalName = $_FILES[$key]['name'];
+            $this->errorCode = $_FILES[$key]['error'];
+            parent::__construct($_FILES[$key]['tmp_name']);
+        } else {
+            $this->originalName = $_FILES[$key]['name'][$index];
+            $this->errorCode = $_FILES[$key]['error'][$index];
+            parent::__construct($_FILES[$key]['tmp_name'][$index]);
+        }
     }
 
     /**
