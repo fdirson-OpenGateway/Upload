@@ -196,7 +196,7 @@ class File extends \SplFileInfo
      * Get file extension (without leading dot)
      * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
         if (!isset($this->extension)) {
             $this->extension = strtolower(pathinfo($this->originalName, PATHINFO_EXTENSION));
